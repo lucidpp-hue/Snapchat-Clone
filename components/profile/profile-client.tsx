@@ -344,8 +344,8 @@ export default function ProfileClient({
         </div>
       </div>
 
-      {/* New story dialog */}
-      {storyDialogOpen && (
+      {/* New story — step 1: pick image (small dialog) */}
+      {storyDialogOpen && !storyPreview && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-2xl w-full max-w-sm p-5 flex flex-col gap-4">
             <div className="flex items-center justify-between">
@@ -355,34 +355,64 @@ export default function ProfileClient({
               </button>
             </div>
 
-            {/* Image picker */}
             <div
               className="rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center cursor-pointer border-2 border-dashed border-gray-700 hover:border-orange-500 transition-colors"
-              style={{ aspectRatio: "9/16", maxHeight: 300 }}
+              style={{ aspectRatio: "9/16" }}
               onClick={() => storyFileRef.current?.click()}
             >
-              {storyPreview ? (
-                <Image src={storyPreview} alt="Предпросмотр" fill className="object-cover" />
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-gray-500">
-                  <Plus className="w-8 h-8" />
-                  <span className="text-sm">Выбрать фото</span>
-                </div>
-              )}
+              <div className="flex flex-col items-center gap-2 text-gray-500">
+                <Plus className="w-10 h-10" />
+                <span className="text-sm">Выбрать фото</span>
+              </div>
             </div>
             <input ref={storyFileRef} type="file" accept="image/*" className="hidden" onChange={handleStoryFileChange} />
+          </div>
+        </div>
+      )}
 
+      {/* New story — step 2: full-screen composer once image is picked */}
+      {storyDialogOpen && storyPreview && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col">
+          {/* Full-screen background image */}
+          <div className="absolute inset-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={storyPreview} alt="Предпросмотр" className="w-full h-full object-cover" />
+            {/* Gradient overlays top + bottom */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60 pointer-events-none" />
+          </div>
+
+          {/* Top bar */}
+          <div className="relative z-10 flex items-center justify-between px-4 pt-10 pb-2">
+            <button
+              onClick={() => { setStoryPreview(null); setStoryFile(null); }}
+              className="bg-black/40 backdrop-blur-sm rounded-full p-2 text-white hover:bg-black/60 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => storyFileRef.current?.click()}
+              className="bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm hover:bg-black/60 transition-colors"
+            >
+              Изменить фото
+            </button>
+          </div>
+          <input ref={storyFileRef} type="file" accept="image/*" className="hidden" onChange={handleStoryFileChange} />
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Bottom: caption + post button */}
+          <div className="relative z-10 px-4 pb-10 flex flex-col gap-3">
             <textarea
-              className="bg-gray-800 border border-gray-700 rounded-xl p-3 text-sm text-white resize-none focus:outline-none focus:border-orange-500"
+              className="w-full bg-black/40 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-sm text-white resize-none focus:outline-none focus:border-orange-400 placeholder-white/60"
               rows={2}
               value={storyCaption}
               onChange={(e) => setStoryCaption(e.target.value)}
-              placeholder="Подпись к истории (необязательно)..."
+              placeholder="Добавьте подпись..."
             />
-
             <Button
-              className="bg-orange-500 hover:bg-orange-400 text-white rounded-full w-full"
-              disabled={!storyFile || uploadingStory}
+              className="bg-orange-500 hover:bg-orange-400 text-white rounded-full w-full py-3 text-base font-semibold shadow-lg"
+              disabled={uploadingStory}
               onClick={handlePostStory}
             >
               {uploadingStory ? "Публикация..." : "Опубликовать историю"}
