@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { unstable_noStore as noStore } from "next/cache";
-import { ChatEntry, Message, Profile } from "@/types/supabase";
+import { ChatEntry, Message, Post, Profile } from "@/types/supabase";
 
 export const getUsersForSidebar = async (authUserId: string): Promise<ChatEntry[]> => {
   noStore();
@@ -66,4 +66,39 @@ export const getMessages = async (authUserId: string, otherUserId: string): Prom
 
   if (error || !data) return [];
   return data as Message[];
+};
+
+export const getPosts = async (): Promise<Post[]> => {
+  noStore();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*, author:profiles!author_id(*)")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error || !data) return [];
+  return data as Post[];
+};
+
+export const getLikedPostIds = async (userId: string): Promise<string[]> => {
+  noStore();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("post_likes")
+    .select("post_id")
+    .eq("user_id", userId);
+  if (error || !data) return [];
+  return data.map((r) => r.post_id as string);
+};
+
+export const isFollowing = async (followerId: string, followingId: string): Promise<boolean> => {
+  noStore();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("follows")
+    .select("follower_id")
+    .eq("follower_id", followerId)
+    .eq("following_id", followingId)
+    .maybeSingle();
+  return !!data;
 };

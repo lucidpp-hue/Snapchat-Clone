@@ -11,10 +11,12 @@ const Navbar = async () => {
 
     return (
         <header className='w-full py-4 px-8 flex justify-between items-center'>
-            <Image src='/logo.svg' width={40} height={40} alt='Snapchat logo' className='cursor-pointer' />
+            <Image src='/logo.png' width={40} height={40} alt='PeytOtoria' className='cursor-pointer rounded-lg' />
             <div className='flex space-x-1'>
                 <Button className='bg-transparent hover:bg-primary/5 text-black'>Истории</Button>
-                <Button className='bg-transparent hover:bg-primary/5 text-black'>Обзор</Button>
+                <Button asChild className='bg-transparent hover:bg-primary/5 text-black'>
+                    <Link href={"/spotlight"}>Обзор</Link>
+                </Button>
                 <Button asChild className='bg-transparent hover:bg-primary/5 text-black'>
                     <Link href={"/chat"}>Чаты</Link>
                 </Button>

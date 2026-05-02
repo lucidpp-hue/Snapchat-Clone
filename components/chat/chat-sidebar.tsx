@@ -5,11 +5,13 @@ import Chats from "./chats";
 
 type ChatSideBarProps = {
   fullName: string;
+  avatarUrl?: string;
+  userId?: string;
 };
 
-const ChatSideBar = ({ fullName }: ChatSideBarProps) => {
+const ChatSideBar = ({ fullName, avatarUrl, userId }: ChatSideBarProps) => {
   return (
-    <ChatSideBarClient fullName={fullName}>
+    <ChatSideBarClient fullName={fullName} avatarUrl={avatarUrl} userId={userId}>
       <Suspense fallback={<ChatsSkeleton />}>
         <Chats />
       </Suspense>

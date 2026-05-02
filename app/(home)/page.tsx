@@ -26,7 +26,7 @@ export default async function Home() {
                 className='mt-4 bg-black text-white flex items-center rounded-lg gap-2 mx-auto md:mx-0'
               >
                 <Link href={"/login"} className='max-w-max'>
-                  <Image src='/logo.svg' width={20} height={20} alt='Логотип PeytOtoria' />
+                  <Image src='/logo.png' width={20} height={20} alt='Логотип PeytOtoria' className="rounded" />
                   Войти и исследовать
                 </Link>
               </Button>
@@ -36,7 +36,7 @@ export default async function Home() {
                 className='mt-4 bg-black text-white flex items-center rounded-lg gap-2 mx-auto md:mx-0'
               >
                 <Link href={"/chat"} className='max-w-max'>
-                  <Image src='/logo.svg' width={20} height={20} alt='Логотип PeytOtoria' />
+                  <Image src='/logo.png' width={20} height={20} alt='Логотип PeytOtoria' className="rounded" />
                   Начать общение
                 </Link>
               </Button>

@@ -1,18 +1,21 @@
 "use client";
 import { SearchIcon } from "lucide-react";
 import LogoutButton from "../shared/logout-button";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import NewChatDialog from "./new-chat-dialog";
 
 type ChatSideBarClientProps = {
   fullName: string;
+  avatarUrl?: string;
+  userId?: string;
   children: React.ReactNode;
 };
 
-const ChatSideBarClient = ({ fullName, children }: ChatSideBarClientProps) => {
+const ChatSideBarClient = ({ fullName, avatarUrl, userId, children }: ChatSideBarClientProps) => {
   const [newChatOpen, setNewChatOpen] = useState(false);
 
   const initials = fullName
@@ -28,18 +31,21 @@ const ChatSideBarClient = ({ fullName, children }: ChatSideBarClientProps) => {
         <div className="sticky top-0 bg-black z-50">
           <div className="flex items-center justify-between p-4 border-b border-gray-800">
             <div className="relative">
-              <Avatar className="cursor-pointer hover:bg-sigBackgroundSecondaryHover">
-                <AvatarFallback className="bg-orange-400 text-black font-bold text-sm">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+              <Link href={userId ? `/profile/${userId}` : "/"}>
+                <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
+                  <AvatarImage src={avatarUrl || ""} />
+                  <AvatarFallback className="bg-orange-500 text-black font-bold text-sm">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
             </div>
             <Button
               className="bg-sigButton hover:bg-sigButtonHover text-white rounded-full h-8 w-8 relative p-2"
               onClick={() => setNewChatOpen(true)}
-              title="New Chat"
+              title="Новый чат"
             >
-              <Image src={"/chat.svg"} fill alt="New chat" />
+              <Image src={"/chat.svg"} fill alt="Новый чат" />
             </Button>
             <LogoutButton />
           </div>
