@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getUserProfile } from "@/lib/data";
-import { isFollowing } from "@/lib/data";
+import { getUserProfile, isFollowing, getStoriesForProfile, getLikedStoryIds } from "@/lib/data";
 import { redirect } from "next/navigation";
 import ProfileClient from "@/components/profile/profile-client";
 
@@ -10,16 +9,21 @@ const ProfilePage = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const profile = await getUserProfile(id);
-  const isOwner = user.id === id;
-  const following = isOwner ? false : await isFollowing(user.id, id);
+  const [profile, stories, likedStoryIds, following] = await Promise.all([
+    getUserProfile(id),
+    getStoriesForProfile(id),
+    getLikedStoryIds(user.id),
+    user.id === id ? Promise.resolve(false) : isFollowing(user.id, id),
+  ]);
 
   return (
     <ProfileClient
       profile={profile}
-      isOwner={isOwner}
+      isOwner={user.id === id}
       initialFollowing={following}
       currentUserId={user.id}
+      initialStories={stories}
+      initialLikedStoryIds={likedStoryIds}
     />
   );
 };

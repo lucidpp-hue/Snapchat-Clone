@@ -40,3 +40,15 @@ export type Post = {
   updated_at: string;
   author?: Profile;
 };
+
+export type Story = {
+  id: string;
+  author_id: string;
+  image_url: string;
+  caption: string;
+  views_count: number;
+  likes_count: number;
+  expires_at: string;
+  created_at: string;
+  author?: Profile;
+};

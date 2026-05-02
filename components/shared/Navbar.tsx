@@ -10,23 +10,30 @@ const Navbar = async () => {
     const { data: { user } } = await supabase.auth.getUser();
 
     return (
-        <header className='w-full py-4 px-8 flex justify-between items-center'>
-            <Image src='/logo.png' width={40} height={40} alt='PeytOtoria' className='cursor-pointer rounded-lg' />
-            <div className='flex space-x-1'>
-                <Button className='bg-transparent hover:bg-primary/5 text-black'>Истории</Button>
-                <Button asChild className='bg-transparent hover:bg-primary/5 text-black'>
-                    <Link href={"/spotlight"}>Обзор</Link>
+        <header className="w-full py-4 px-8 flex justify-between items-center">
+            <Link href="/">
+                <Image src="/logo.png" width={40} height={40} alt="PeytOtoria" className="cursor-pointer rounded-xl" />
+            </Link>
+            <nav className="flex space-x-1">
+                <Button asChild className="bg-transparent hover:bg-primary/5 text-black font-semibold shadow-none">
+                    <Link href="/chat">Чаты</Link>
                 </Button>
-                <Button asChild className='bg-transparent hover:bg-primary/5 text-black'>
-                    <Link href={"/chat"}>Чаты</Link>
-                </Button>
-            </div>
-            <div className='flex space-x-2'>
-                <Button className='bg-black text-white rounded-full p-3 text-xs md:text-sm'>Скачать</Button>
-                {!user && (
-                    <Button asChild className='bg-black text-white rounded-full p-3 text-xs md:text-sm'>
-                        <Link href={"/login"}>Войти</Link>
+                {user && (
+                    <Button asChild className="bg-transparent hover:bg-primary/5 text-black font-semibold shadow-none">
+                        <Link href={`/profile/${user.id}`}>Профиль</Link>
                     </Button>
+                )}
+            </nav>
+            <div className="flex space-x-2">
+                {!user && (
+                    <>
+                        <Button asChild className="bg-black text-white rounded-full px-5 text-sm">
+                            <Link href="/login">Войти</Link>
+                        </Button>
+                        <Button asChild className="bg-orange-500 hover:bg-orange-400 text-white rounded-full px-5 text-sm">
+                            <Link href="/signup">Регистрация</Link>
+                        </Button>
+                    </>
                 )}
                 {user && <LogoutButton />}
             </div>

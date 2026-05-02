@@ -113,6 +113,47 @@ export const followAction = async (targetUserId: string) => {
   return !existing;
 };
 
+export const createStoryAction = async (imageUrl: string, caption: string) => {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await supabase.from("stories").insert({
+    author_id: user.id,
+    image_url: imageUrl,
+    caption,
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/profile/${user.id}`);
+};
+
+export const likeStoryAction = async (storyId: string) => {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data: existing } = await supabase
+    .from("story_likes")
+    .select("story_id")
+    .eq("user_id", user.id)
+    .eq("story_id", storyId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase.from("story_likes").delete().eq("user_id", user.id).eq("story_id", storyId);
+  } else {
+    await supabase.from("story_likes").insert({ user_id: user.id, story_id: storyId });
+  }
+
+  return !existing;
+};
+
+export const incrementStoryViewAction = async (storyId: string) => {
+  const supabase = await createClient();
+  await supabase.rpc("increment_story_views", { story_id: storyId });
+};
+
 export const updateProfileAction = async (formData: { full_name?: string; bio?: string; avatar_url?: string }) => {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

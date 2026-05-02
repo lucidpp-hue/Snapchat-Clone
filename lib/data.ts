@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { unstable_noStore as noStore } from "next/cache";
-import { ChatEntry, Message, Post, Profile } from "@/types/supabase";
+import { ChatEntry, Message, Post, Profile, Story } from "@/types/supabase";
 
 export const getUsersForSidebar = async (authUserId: string): Promise<ChatEntry[]> => {
   noStore();
@@ -89,6 +89,30 @@ export const getLikedPostIds = async (userId: string): Promise<string[]> => {
     .eq("user_id", userId);
   if (error || !data) return [];
   return data.map((r) => r.post_id as string);
+};
+
+export const getStoriesForProfile = async (profileId: string): Promise<Story[]> => {
+  noStore();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("stories")
+    .select("*, author:profiles!author_id(*)")
+    .eq("author_id", profileId)
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return data as Story[];
+};
+
+export const getLikedStoryIds = async (userId: string): Promise<string[]> => {
+  noStore();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("story_likes")
+    .select("story_id")
+    .eq("user_id", userId);
+  if (error || !data) return [];
+  return data.map((r) => r.story_id as string);
 };
 
 export const isFollowing = async (followerId: string, followingId: string): Promise<boolean> => {
