@@ -7,32 +7,25 @@ import Chat, { IChatDocument } from "@/models/chatModel";
 export const getUsersForSidebar = async (authUserId: string) => {
     noStore();
     try {
-        const allUsers: IUserDocument[] = await User.find({ _id: { $ne: authUserId } });
+        await connectToMongoDB();
+        const allUsers: IUserDocument[] = await User.find({ supabaseId: { $ne: authUserId } });
 
         const usersInfo = await Promise.all(
             allUsers.map(async (user) => {
                 const lastMessage: IMessageDocument | null = await Message.findOne({
                     $or: [
-                        { sender: user._id, receiver: authUserId },
-                        { sender: authUserId, receiver: user._id },
+                        { sender: user.supabaseId, receiver: authUserId },
+                        { sender: authUserId, receiver: user.supabaseId },
                     ],
                 })
                     .sort({ createdAt: -1 })
-                    .populate("sender", "fullname avatar _id")
-                    .populate("receiver", "fullname avatar _id")
                     .exec();
 
                 return {
-                    _id: user._id,
+                    _id: user.supabaseId,
                     participants: [user],
-                    lastMessage: lastMessage ? {
-                        ...lastMessage.toJSON(),
-                        sender: lastMessage.sender,
-                        receiver: lastMessage.receiver,
-                    }
-                        : null,
+                    lastMessage: lastMessage ? lastMessage.toJSON() : null,
                 };
-
             })
         );
         return usersInfo;
@@ -42,11 +35,11 @@ export const getUsersForSidebar = async (authUserId: string) => {
     }
 }
 
-export const getUserProfile = async (userId: string) => {
+export const getUserProfile = async (supabaseId: string) => {
     noStore();
     try {
         await connectToMongoDB();
-        const user: IUserDocument | null = await User.findById(userId);
+        const user: IUserDocument | null = await User.findOne({ supabaseId });
         if (!user) throw new Error("User not found");
         return user;
     } catch (error) {
@@ -68,6 +61,8 @@ export const getMessages = async (authUserId: string, otherUserId: string) => {
                 path: "sender",
                 model: "User",
                 select: "fullName",
+                localField: "sender",
+                foreignField: "supabaseId",
             },
         });
 

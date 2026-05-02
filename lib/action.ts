@@ -1,11 +1,11 @@
 "use server";
-import { auth, signIn, signOut } from "@/auth";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { connectToMongoDB } from "./db";
 import { v2 as cloudinary } from "cloudinary";
 import Message, { IMessageDocument } from "@/models/messageModel";
 import Chat, { IChatDocument } from "@/models/chatModel";
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -13,30 +13,21 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
-export async function authAction() {
-    try {
-        await signIn("github"); // redirect()
-    } catch (error: any) {
-        if (error.message === "NEXT_REDIRECT") {
-            throw error;
-        }
-        return error.message;
-    }
-}
-
 export async function logoutAction() {
-    "use server"
-    await signOut();
+    "use server";
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    redirect("/login");
 }
 
 export const sendMessageAction = async (receiverId: string, content: string, messageType: "image" | "text") => {
     noStore();
     try {
-        const session = await auth();
-        if (!session) return;
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
         await connectToMongoDB();
-        const senderId = session.user._id;
+        const senderId = user.id;
 
         let uploadedResponse;
         if (messageType === "image") {
@@ -66,9 +57,6 @@ export const sendMessageAction = async (receiverId: string, content: string, mes
 
         revalidatePath(`/chat/${receiverId}`);
 
-        // Alternative usage for the revalidatePath function:
-        // revalidatePath("/chat/[id]","page")
-
         return newMessage;
     } catch (error: any) {
         console.error("Error in sendMessage:", error.message);
@@ -79,18 +67,17 @@ export const sendMessageAction = async (receiverId: string, content: string, mes
 export const deleteChatAction = async (userId: string) => {
     try {
         await connectToMongoDB();
-        const { user } = (await auth()) || {};
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-        const chat = await Chat.findOne({ participants: { $all: [user._id, userId] } });
+        const chat = await Chat.findOne({ participants: { $all: [user.id, userId] } });
         if (!chat) return;
 
-        const messageIds = chat.messages.map((messageId) => messageId.toString());
+        const messageIds = chat.messages.map((messageId: any) => messageId.toString());
         await Message.deleteMany({ _id: { $in: messageIds } });
         await Chat.deleteOne({ _id: chat._id });
 
         revalidatePath("/chat/[id]", "page");
-        // this will throw an error bc it internally throws an error
-        // redirect("/chat");
     } catch (error: any) {
         console.error("Error in deleteChat:", error.message);
         throw error;

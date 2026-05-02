@@ -2,7 +2,6 @@
 import { IMessageDocument } from "@/models/messageModel";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import { PopulatedDoc } from "mongoose";
-import { Session } from "next-auth";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -54,7 +53,7 @@ import { useEffect, useRef, useState } from "react";
 
 type ChatMessagesProps = {
     messages: IMessageDocument[] | PopulatedDoc<IMessageDocument>[];
-    session: Session | null;
+    session: { user: { _id: string } } | null;
 };
 
 const ChatMessages = ({ messages, session }: ChatMessagesProps) => {

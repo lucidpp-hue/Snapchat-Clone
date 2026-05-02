@@ -3,10 +3,11 @@ import React from "react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import LogoutButton from "./logout-button";
-import { auth } from "@/auth";
+import { createClient } from "@/lib/supabase/server";
 
 const Navbar = async () => {
-    const session = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     return (
         <header className='w-full py-4 px-8 flex justify-between items-center'>
@@ -15,17 +16,17 @@ const Navbar = async () => {
                 <Button className='bg-transparent hover:bg-primary/5 text-black'>Stories</Button>
                 <Button className='bg-transparent hover:bg-primary/5 text-black'>Spotlight</Button>
                 <Button asChild className='bg-transparent hover:bg-primary/5 text-black'>
-                    <Link href={"/chat"}> Chat</Link>
+                    <Link href={"/chat"}>Chat</Link>
                 </Button>
             </div>
             <div className='flex space-x-2'>
                 <Button className='bg-black text-white rounded-full p-3 text-xs md:text-sm'>Download</Button>
-                {!session && (
-					<Button asChild className='bg-black text-white rounded-full p-3 text-xs md:text-sm'>
-						<Link href={"/login"}>Login</Link>
-					</Button>
-				)}
-				{session?.user && <LogoutButton />}
+                {!user && (
+                    <Button asChild className='bg-black text-white rounded-full p-3 text-xs md:text-sm'>
+                        <Link href={"/login"}>Login</Link>
+                    </Button>
+                )}
+                {user && <LogoutButton />}
             </div>
         </header>
     );

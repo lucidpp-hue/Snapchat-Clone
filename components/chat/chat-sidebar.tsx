@@ -1,22 +1,33 @@
 import { SearchIcon } from "lucide-react";
 import LogoutButton from "../shared/logout-button";
-import { Avatar, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import Image from "next/image";
-import { auth } from "@/auth";
+import { createClient } from "@/lib/supabase/server";
 import Chats from "./chats";
 import { Suspense } from "react";
 import { ChatsSkeleton } from "../skeletons/chat-skeletons";
 
 const ChatSideBar = async () => {
-	const session = await auth();
+	const supabase = await createClient();
+	const { data: { user } } = await supabase.auth.getUser();
+	const fullName: string = user?.user_metadata?.full_name ?? user?.email ?? "";
+	const initials = fullName
+		.split(" ")
+		.map((n: string) => n[0])
+		.join("")
+		.toUpperCase()
+		.slice(0, 2);
+
 	return (
 		<aside className='flex-[1_1_0%] flex flex-col bg-black text-white'>
 			<div className='sticky top-0 bg-black z-50'>
 				<div className='flex items-center justify-between p-4 border-b border-gray-800 '>
 					<div className='relative'>
 						<Avatar className='cursor-pointer hover:bg-sigBackgroundSecondaryHover'>
-							<AvatarImage src={session?.user?.image!} />
+							<AvatarFallback className='bg-yellow-400 text-black font-bold text-sm'>
+								{initials}
+							</AvatarFallback>
 						</Avatar>
 					</div>
 					<Button className='bg-sigButton hover:bg-sigButtonHover text-white rounded-full h-8 w-8 relative p-2'>
