@@ -118,6 +118,7 @@ export default function ProfileClient({
   const [bio, setBio] = useState(profile.bio || "");
   const [isPending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
+  const [storyError, setStoryError] = useState<string | null>(null);
   const [stories, setStories] = useState<Story[]>(initialStories);
 
   // New story dialog state
@@ -155,11 +156,16 @@ export default function ProfileClient({
   const handlePostStory = async () => {
     if (!storyFile) return;
     setUploadingStory(true);
-    const fd = new FormData();
-    fd.append("file", storyFile);
-    const res = await fetch("/api/upload-story", { method: "POST", body: fd });
-    const json = await res.json();
-    if (json.url) {
+    setStoryError(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", storyFile);
+      const res = await fetch("/api/upload-story", { method: "POST", body: fd });
+      const json = await res.json();
+      if (!res.ok || !json.url) {
+        setStoryError(json.error || "Не удалось загрузить фото. Попробуйте снова.");
+        return;
+      }
       await createStoryAction(json.url, storyCaption);
       const newStory: Story = {
         id: crypto.randomUUID(),
@@ -172,12 +178,16 @@ export default function ProfileClient({
         created_at: new Date().toISOString(),
       };
       setStories((prev) => [newStory, ...prev]);
+      setStoryDialogOpen(false);
+      setStoryCaption("");
+      setStoryPreview(null);
+      setStoryFile(null);
+    } catch (err) {
+      setStoryError("Произошла ошибка. Попробуйте снова.");
+      console.error("[v0] story upload error:", err);
+    } finally {
+      setUploadingStory(false);
     }
-    setStoryDialogOpen(false);
-    setStoryCaption("");
-    setStoryPreview(null);
-    setStoryFile(null);
-    setUploadingStory(false);
   };
 
   const handleFollow = () => {
@@ -350,7 +360,7 @@ export default function ProfileClient({
           <div className="bg-gray-900 rounded-2xl w-full max-w-sm p-5 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-white">Новая история</h3>
-              <button onClick={() => { setStoryDialogOpen(false); setStoryPreview(null); setStoryFile(null); setStoryCaption(""); }}>
+              <button onClick={() => { setStoryDialogOpen(false); setStoryPreview(null); setStoryFile(null); setStoryCaption(""); setStoryError(null); }}>
                 <X className="w-5 h-5 text-gray-400 hover:text-white" />
               </button>
             </div>
@@ -384,7 +394,7 @@ export default function ProfileClient({
           {/* Top bar */}
           <div className="relative z-10 flex items-center justify-between px-4 pt-10 pb-2">
             <button
-              onClick={() => { setStoryPreview(null); setStoryFile(null); }}
+              onClick={() => { setStoryPreview(null); setStoryFile(null); setStoryError(null); }}
               className="bg-black/40 backdrop-blur-sm rounded-full p-2 text-white hover:bg-black/60 transition-colors"
             >
               <X className="w-5 h-5" />
@@ -403,6 +413,9 @@ export default function ProfileClient({
 
           {/* Bottom: caption + post button */}
           <div className="relative z-10 px-4 pb-10 flex flex-col gap-3">
+            {storyError && (
+              <p className="text-red-400 text-sm text-center bg-black/50 rounded-xl px-3 py-2">{storyError}</p>
+            )}
             <textarea
               className="w-full bg-black/40 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-sm text-white resize-none focus:outline-none focus:border-orange-400 placeholder-white/60"
               rows={2}
@@ -411,11 +424,16 @@ export default function ProfileClient({
               placeholder="Добавьте подпись..."
             />
             <Button
-              className="bg-orange-500 hover:bg-orange-400 text-white rounded-full w-full py-3 text-base font-semibold shadow-lg"
+              className="bg-orange-500 hover:bg-orange-400 text-white rounded-full w-full py-3 text-base font-semibold shadow-lg disabled:opacity-60"
               disabled={uploadingStory}
               onClick={handlePostStory}
             >
-              {uploadingStory ? "Публикация..." : "Опубликовать историю"}
+              {uploadingStory ? (
+                <span className="flex items-center gap-2 justify-center">
+                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  Публикация...
+                </span>
+              ) : "Опубликовать историю"}
             </Button>
           </div>
         </div>
