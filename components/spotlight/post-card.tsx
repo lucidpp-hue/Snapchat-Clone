@@ -87,19 +87,12 @@ export default function PostCard({ post, initialLiked }: Props) {
         >
           <span className="relative flex items-center justify-center w-8 h-8">
             <Heart
-              className={`w-5 h-5 transition-colors ${liked ? "text-red-500 fill-red-500" : "text-gray-400 group-hover:text-red-400"}`}
-              style={{
-                transform: heartBurst ? "scale(1.6)" : "scale(1)",
-                transition: heartBurst
-                  ? "transform 0.15s cubic-bezier(0.34,1.56,0.64,1)"
-                  : "transform 0.25s ease",
-              }}
+              className={`w-5 h-5 transition-all duration-150 ${
+                liked ? "text-red-500 fill-red-500" : "text-gray-400 group-hover:text-red-400"
+              } ${heartBurst ? "scale-150" : "scale-100"}`}
             />
             {heartBurst && (
-              <span
-                className="absolute inset-0 rounded-full bg-red-500/20 animate-ping"
-                style={{ animationDuration: "0.5s", animationIterationCount: 1 }}
-              />
+              <span className="absolute inset-0 rounded-full bg-red-500/30 animate-heart-burst pointer-events-none" />
             )}
           </span>
           <span className="text-xs text-gray-400 tabular-nums">{formatCount(likesCount)}</span>

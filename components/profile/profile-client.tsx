@@ -67,7 +67,7 @@ export default function ProfileClient({ profile, isOwner, initialFollowing, curr
         {/* Avatar + actions row */}
         <div className="flex items-end justify-between -mt-14 mb-4">
           <div className="relative">
-            <div className="w-28 h-28 rounded-full border-4 border-black overflow-hidden bg-orange-500 flex items-center justify-center">
+            <div className="w-28 h-28 rounded-full border-4 border-black overflow-hidden bg-orange-500 flex items-center justify-center relative">
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}

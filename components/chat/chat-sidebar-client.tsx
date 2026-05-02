@@ -1,9 +1,8 @@
 "use client";
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, SquarePen } from "lucide-react";
 import LogoutButton from "../shared/logout-button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import NewChatDialog from "./new-chat-dialog";
@@ -41,11 +40,11 @@ const ChatSideBarClient = ({ fullName, avatarUrl, userId, children }: ChatSideBa
               </Link>
             </div>
             <Button
-              className="bg-sigButton hover:bg-sigButtonHover text-white rounded-full h-8 w-8 relative p-2"
+              className="bg-sigButton hover:bg-sigButtonHover text-white rounded-full h-8 w-8 p-0 flex items-center justify-center"
               onClick={() => setNewChatOpen(true)}
               title="Новый чат"
             >
-              <Image src={"/chat.svg"} fill alt="Новый чат" />
+              <SquarePen className="w-4 h-4" />
             </Button>
             <LogoutButton />
           </div>
