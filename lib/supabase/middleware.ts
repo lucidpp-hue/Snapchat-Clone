@@ -31,14 +31,15 @@ export async function updateSession(request: NextRequest) {
   const isVisitingAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/signup')
+  const isAuthCallback = request.nextUrl.pathname.startsWith('/auth/callback')
 
-  if (!user && isVisitingChatPage) {
+  if (!user && isVisitingChatPage && !isAuthCallback) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (user && isVisitingAuthPage) {
+  if (user && isVisitingAuthPage && !isAuthCallback) {
     const url = request.nextUrl.clone()
     url.pathname = '/chat'
     return NextResponse.redirect(url)
