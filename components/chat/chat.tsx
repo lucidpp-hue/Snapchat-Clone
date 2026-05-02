@@ -1,81 +1,90 @@
-import Link from 'next/link';
-import React from 'react'
-import { Avatar, AvatarImage } from '../ui/avatar';
-import Image from 'next/image';
-import { formatDate } from '@/lib/utils';
+import Link from "next/link";
+import React from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import Image from "next/image";
+import { formatDate } from "@/lib/utils";
 import { ImageMessageSvg, TextMessageSent, TextMessageSvgReceived } from "../svgs/chatSvg";
-
+import { ChatEntry } from "@/types/supabase";
 
 type ChatProps = {
-    chat: any;
+  chat: ChatEntry;
 };
 
 const Chat = ({ chat }: ChatProps) => {
-    const userToChat = chat.participants[0];
-    const lastMessage = chat.lastMessage;
-    const lastMessageType = lastMessage?.messageType;
-    const formattedDate = lastMessage ? formatDate(lastMessage?.createdAt!) : formatDate(new Date());
-    const amISender = lastMessage && lastMessage.sender._id !== userToChat?._id;
-    const isMsgOpened = lastMessage?.opened;
+  const userToChat = chat.participants[0];
+  const lastMessage = chat.lastMessage;
+  const lastMessageType = lastMessage?.message_type;
+  const formattedDate = lastMessage
+    ? formatDate(new Date(lastMessage.created_at))
+    : formatDate(new Date());
+  const amISender = lastMessage ? lastMessage.sender_id !== userToChat?.id : false;
+  const isMsgOpened = lastMessage?.opened;
 
-    let messageStatus: string;
-    let iconComponent: JSX.Element;
+  let messageStatus: string;
+  let iconComponent: JSX.Element;
 
-    if (amISender) {
-        messageStatus = isMsgOpened ? "Opened" : "Sent";
-        iconComponent =
-            lastMessageType === "text" ? (
-                <TextMessageSent className={isMsgOpened ? "text-sigSnapChat " : "text-sigSnapChat fill-current"} />
-            ) : (
-                <ImageMessageSvg className={isMsgOpened ? "text-sigSnapImg" : "text-sigSnapImg fill-current"} />
-            );
+  if (amISender) {
+    messageStatus = isMsgOpened ? "Opened" : "Sent";
+    iconComponent =
+      lastMessageType === "text" ? (
+        <TextMessageSent className={isMsgOpened ? "text-sigSnapChat" : "text-sigSnapChat fill-current"} />
+      ) : (
+        <ImageMessageSvg className={isMsgOpened ? "text-sigSnapImg" : "text-sigSnapImg fill-current"} />
+      );
+  } else {
+    if (!lastMessage) {
+      iconComponent = <TextMessageSvgReceived className="fill-current" />;
+      messageStatus = "Say Hi!";
     } else {
-        if (!lastMessage) {
-            iconComponent = <TextMessageSvgReceived className='fill-current' />;
-            messageStatus = "Say Hi!";
-        } else {
-            messageStatus = isMsgOpened ? "Received" : "Show Message";
-            iconComponent =
-                lastMessageType === "text" ? (
-                    <TextMessageSvgReceived
-                        className={!isMsgOpened ? "text-sigSnapChat fill-current" : "text-sigSnapChat"}
-                    />
-                ) : (
-                    <ImageMessageSvg className={!isMsgOpened ? "text-sigSnapImg fill-current" : "text-sigSnapImg"} />
-                );
-        }
+      messageStatus = isMsgOpened ? "Received" : "Show Message";
+      iconComponent =
+        lastMessageType === "text" ? (
+          <TextMessageSvgReceived
+            className={!isMsgOpened ? "text-sigSnapChat fill-current" : "text-sigSnapChat"}
+          />
+        ) : (
+          <ImageMessageSvg className={!isMsgOpened ? "text-sigSnapImg fill-current" : "text-sigSnapImg"} />
+        );
     }
+  }
 
-    return (
-        <Link href={`/chat/${userToChat?._id}`}>
-            <li className='flex items-center p-2  bg-sigSurface hover:bg-sigBackgroundFeedHover cursor-pointer border-b border-b-sigColorBgBorder'>
-                <Avatar className='w-14 h-14 bg-black'>
-                    <AvatarImage
-                        src={
-                            userToChat?.avatar ||
-                            "https://questhowth.ie/wp-content/uploads/2018/04/user-placeholder.png"
-                        }
-                    />
-                </Avatar>
+  const initials = userToChat?.full_name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || userToChat?.email[0]?.toUpperCase();
 
-                <div className='ml-3'>
-                    <p>{userToChat?.fullName}</p>
-                    <p className='text-gray-400 text-xs flex gap-1'>
-                        {iconComponent}
-                        {messageStatus} - {formattedDate}
-                    </p>
-                </div>
-                <Image
-                    src={"/camera.svg"}
-                    height={0}
-                    width={0}
-                    style={{ width: "20px", height: "auto" }}
-                    className='ml-auto hover:scale-95 '
-                    alt='Camera Icon'
-                />
-            </li>
-        </Link>
-    )
-}
+  return (
+    <Link href={`/chat/${userToChat?.id}`}>
+      <li className="flex items-center p-2 bg-sigSurface hover:bg-sigBackgroundFeedHover cursor-pointer border-b border-b-sigColorBgBorder">
+        <Avatar className="w-14 h-14 bg-black">
+          <AvatarImage
+            src={userToChat?.avatar_url || "https://questhowth.ie/wp-content/uploads/2018/04/user-placeholder.png"}
+          />
+          <AvatarFallback className="bg-yellow-400 text-black font-bold text-sm">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
 
-export default Chat
+        <div className="ml-3">
+          <p>{userToChat?.full_name || userToChat?.email}</p>
+          <p className="text-gray-400 text-xs flex gap-1">
+            {iconComponent}
+            {messageStatus} - {formattedDate}
+          </p>
+        </div>
+        <Image
+          src={"/camera.svg"}
+          height={0}
+          width={0}
+          style={{ width: "20px", height: "auto" }}
+          className="ml-auto hover:scale-95"
+          alt="Camera Icon"
+        />
+      </li>
+    </Link>
+  );
+};
+
+export default Chat;

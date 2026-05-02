@@ -1,86 +1,70 @@
 "use server";
-import { revalidatePath, unstable_noStore as noStore } from "next/cache";
-import { connectToMongoDB } from "./db";
+import { revalidatePath } from "next/cache";
 import { v2 as cloudinary } from "cloudinary";
-import Message, { IMessageDocument } from "@/models/messageModel";
-import Chat, { IChatDocument } from "@/models/chatModel";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 export async function logoutAction() {
-    "use server";
-    const supabase = await createClient();
-    await supabase.auth.signOut();
-    redirect("/login");
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
 }
 
-export const sendMessageAction = async (receiverId: string, content: string, messageType: "image" | "text") => {
-    noStore();
-    try {
-        const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        await connectToMongoDB();
-        const senderId = user.id;
+export const sendMessageAction = async (
+  receiverId: string,
+  content: string,
+  messageType: "image" | "text"
+) => {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
 
-        let uploadedResponse;
-        if (messageType === "image") {
-            uploadedResponse = await cloudinary.uploader.upload(content);
-        }
+  let finalContent = content;
+  if (messageType === "image") {
+    const uploaded = await cloudinary.uploader.upload(content);
+    finalContent = uploaded.secure_url;
+  }
 
-        const newMessage: IMessageDocument = await Message.create({
-            sender: senderId,
-            receiver: receiverId,
-            content: uploadedResponse?.secure_url || content,
-            messageType,
-        });
+  const { data, error } = await supabase.from("messages").insert({
+    sender_id: user.id,
+    receiver_id: receiverId,
+    content: finalContent,
+    message_type: messageType,
+    opened: false,
+  }).select().single();
 
-        let chat: IChatDocument | null = await Chat.findOne({
-            participants: { $all: [senderId, receiverId] },
-        });
+  if (error) throw new Error(error.message);
 
-        if (!chat) {
-            chat = await Chat.create({
-                participants: [senderId, receiverId],
-                messages: [newMessage._id],
-            });
-        } else {
-            chat.messages.push(newMessage._id);
-            await chat.save();
-        }
-
-        revalidatePath(`/chat/${receiverId}`);
-
-        return newMessage;
-    } catch (error: any) {
-        console.error("Error in sendMessage:", error.message);
-        throw error;
-    }
+  revalidatePath(`/chat/${receiverId}`);
+  return data;
 };
 
-export const deleteChatAction = async (userId: string) => {
-    try {
-        await connectToMongoDB();
-        const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        const chat = await Chat.findOne({ participants: { $all: [user.id, userId] } });
-        if (!chat) return;
+export const deleteChatAction = async (otherUserId: string) => {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
 
-        const messageIds = chat.messages.map((messageId: any) => messageId.toString());
-        await Message.deleteMany({ _id: { $in: messageIds } });
-        await Chat.deleteOne({ _id: chat._id });
+  const { error } = await supabase
+    .from("messages")
+    .delete()
+    .or(
+      `and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`
+    );
 
-        revalidatePath("/chat/[id]", "page");
-    } catch (error: any) {
-        console.error("Error in deleteChat:", error.message);
-        throw error;
-    }
-    redirect("/chat");
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/chat/[id]", "page");
+  redirect("/chat");
+};
+
+export const markMessageOpenedAction = async (messageId: string) => {
+  const supabase = await createClient();
+  await supabase.from("messages").update({ opened: true }).eq("id", messageId);
+  revalidatePath("/chat/[id]", "page");
 };

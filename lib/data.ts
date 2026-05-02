@@ -1,77 +1,69 @@
-import Message, { IMessageDocument } from "@/models/messageModel";
-import User, { IUserDocument } from "@/models/userModel"
-import { connectToMongoDB } from "./db";
+import { createClient } from "@/lib/supabase/server";
 import { unstable_noStore as noStore } from "next/cache";
-import Chat, { IChatDocument } from "@/models/chatModel";
+import { ChatEntry, Message, Profile } from "@/types/supabase";
 
-export const getUsersForSidebar = async (authUserId: string) => {
-    noStore();
-    try {
-        await connectToMongoDB();
-        const allUsers: IUserDocument[] = await User.find({ supabaseId: { $ne: authUserId } });
+export const getUsersForSidebar = async (authUserId: string): Promise<ChatEntry[]> => {
+  noStore();
+  const supabase = await createClient();
 
-        const usersInfo = await Promise.all(
-            allUsers.map(async (user) => {
-                const lastMessage: IMessageDocument | null = await Message.findOne({
-                    $or: [
-                        { sender: user.supabaseId, receiver: authUserId },
-                        { sender: authUserId, receiver: user.supabaseId },
-                    ],
-                })
-                    .sort({ createdAt: -1 })
-                    .exec();
+  // Get all other profiles
+  const { data: profiles, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .neq("id", authUserId);
 
-                return {
-                    _id: user.supabaseId,
-                    participants: [user],
-                    lastMessage: lastMessage ? lastMessage.toJSON() : null,
-                };
-            })
-        );
-        return usersInfo;
-    } catch (error) {
-        console.log("Error in getUsersForSidebar: ", error);
-        throw error;
-    }
-}
+  if (error || !profiles) return [];
 
-export const getUserProfile = async (supabaseId: string) => {
-    noStore();
-    try {
-        await connectToMongoDB();
-        const user: IUserDocument | null = await User.findOne({ supabaseId });
-        if (!user) throw new Error("User not found");
-        return user;
-    } catch (error) {
-        console.log("Error in getUserProfile: ", error);
-        throw error;
-    }
+  // For each profile, find the most recent message exchanged
+  const chatEntries: ChatEntry[] = await Promise.all(
+    profiles.map(async (profile: Profile) => {
+      const { data: lastMsg } = await supabase
+        .from("messages")
+        .select("*")
+        .or(
+          `and(sender_id.eq.${authUserId},receiver_id.eq.${profile.id}),and(sender_id.eq.${profile.id},receiver_id.eq.${authUserId})`
+        )
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      return {
+        _id: profile.id,
+        participants: [profile],
+        lastMessage: lastMsg ?? null,
+      };
+    })
+  );
+
+  return chatEntries;
 };
 
-export const getMessages = async (authUserId: string, otherUserId: string) => {
-    noStore();
-    try {
-        await connectToMongoDB();
+export const getUserProfile = async (userId: string): Promise<Profile> => {
+  noStore();
+  const supabase = await createClient();
 
-        const chat: IChatDocument | null = await Chat.findOne({
-            participants: { $all: [authUserId, otherUserId] },
-        }).populate({
-            path: "messages",
-            populate: {
-                path: "sender",
-                model: "User",
-                select: "fullName",
-                localField: "sender",
-                foreignField: "supabaseId",
-            },
-        });
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
 
-        if (!chat) return [];
+  if (error || !data) throw new Error("User not found");
+  return data as Profile;
+};
 
-        const messages = chat.messages;
-        return JSON.parse(JSON.stringify(messages));
-    } catch (error) {
-        console.log("Error in getMessages: ", error);
-        throw error;
-    }
+export const getMessages = async (authUserId: string, otherUserId: string): Promise<Message[]> => {
+  noStore();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("messages")
+    .select("*, sender:profiles!messages_sender_id_fkey(*)")
+    .or(
+      `and(sender_id.eq.${authUserId},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${authUserId})`
+    )
+    .order("created_at", { ascending: true });
+
+  if (error || !data) return [];
+  return data as Message[];
 };
