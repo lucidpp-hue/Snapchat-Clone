@@ -18,6 +18,7 @@ const SendMsgInput = () => {
 
     const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (!messageContent.trim()) return;
         setIsLoading(true);
         try {
             await sendMessageAction(receiverId, messageContent, "text");
