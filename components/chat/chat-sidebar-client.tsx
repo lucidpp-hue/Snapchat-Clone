@@ -29,7 +29,7 @@ const ChatSideBarClient = ({ fullName, children }: ChatSideBarClientProps) => {
           <div className="flex items-center justify-between p-4 border-b border-gray-800">
             <div className="relative">
               <Avatar className="cursor-pointer hover:bg-sigBackgroundSecondaryHover">
-                <AvatarFallback className="bg-yellow-400 text-black font-bold text-sm">
+                <AvatarFallback className="bg-orange-400 text-black font-bold text-sm">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -48,7 +48,7 @@ const ChatSideBarClient = ({ fullName, children }: ChatSideBarClientProps) => {
               <SearchIcon className="text-gray-400 w-5" />
               <input
                 className="bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
-                placeholder="Search"
+                placeholder="Поиск"
                 type="text"
               />
             </div>

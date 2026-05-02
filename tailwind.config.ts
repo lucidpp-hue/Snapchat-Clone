@@ -72,8 +72,8 @@ const config = {
 				"accordion-up": "accordion-up 0.2s ease-out",
 			},
 			backgroundColor: {
-				sigButton: "#0fabff",
-				sigButtonHover: "#42c0ff",
+				sigButton: "#f97316",
+				sigButtonHover: "#fb923c",
 				sigBackgroundFeedHover: "#292929",
 				sigBackgroundSecondaryHover: "#2b2b2b",
 				sigSnapImg: "#f23c57",

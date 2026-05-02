@@ -44,7 +44,7 @@ const SendMsgInput = () => {
             </div>
             <form onSubmit={handleSendMessage} className='flex-1 flex  items-center gap-1 bg-sigBackgroundSecondaryHover rounded-full border   border-sigColorBgBorder'>
                 <Input
-                    placeholder='Send a chat'
+                    placeholder='Написать сообщение'
                     className='bg-transparent focus:outline-transparent border-none outline-none w-full h-full rounded-full'
                     type='text'
                     value={messageContent}

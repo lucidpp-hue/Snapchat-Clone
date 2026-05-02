@@ -65,21 +65,21 @@ const NewChatDialog = ({ open, onClose }: NewChatDialogProps) => {
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent className="bg-sigMain border border-sigColorBgBorder text-white max-w-xs">
         <DialogHeader>
-          <DialogTitle className="text-white">New Chat</DialogTitle>
+          <DialogTitle className="text-white">Новый чат</DialogTitle>
         </DialogHeader>
 
         <div className="text-gray-400 p-1 flex gap-2 rounded-full bg-sigSurface border border-sigColorBgBorder">
           <SearchIcon className="text-gray-400 w-5 shrink-0" />
           <input
             className="bg-transparent border-none text-sm text-white placeholder-gray-400 focus:outline-none w-full"
-            placeholder="Search by name or email..."
+            placeholder="Поиск по имени или почте..."
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
-        <p className="font-semibold text-sm">People:</p>
+        <p className="font-semibold text-sm">Пользователи:</p>
 
         <div className="flex flex-col max-h-56 bg-sigSurface rounded-md overflow-auto">
           {isFetchingUsers ? (
@@ -88,7 +88,7 @@ const NewChatDialog = ({ open, onClose }: NewChatDialogProps) => {
             </div>
           ) : filteredUsers.length === 0 ? (
             <p className="text-gray-400 text-sm text-center py-4">
-              {search ? "No users found." : "No other users yet."}
+              {search ? "Пользователи не найдены." : "Других пользователей пока нет."}
             </p>
           ) : (
             filteredUsers.map((user: Profile) => (
@@ -109,15 +109,15 @@ const NewChatDialog = ({ open, onClose }: NewChatDialogProps) => {
             onClick={handleClose}
             className="rounded-full text-gray-400 hover:text-white"
           >
-            Cancel
+            Отмена
           </Button>
           <Button
             size="sm"
-            className="rounded-full px-5 bg-sigSnapChat hover:bg-sigSnapChat"
+            className="rounded-full px-5 bg-orange-500 hover:bg-orange-400 text-white"
             onClick={handleOpen}
             disabled={!selectedUser}
           >
-            Open Chat
+            Открыть чат
           </Button>
         </div>
       </DialogContent>

@@ -4,7 +4,7 @@ import React from 'react'
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     return (
-        <div className="bg-gradient-to-r from-slate-500 to-yellow-100">
+        <div className="bg-gradient-to-r from-slate-500 to-orange-200">
             <div className='flex flex-col items-center justify-center min-h-screen bg-auth-layout'>
                 <div className='p-8 bg-white rounded-lg shadow-md min-w-80'>
                     <Link href={"/"} className='flex justify-center mb-4'>
