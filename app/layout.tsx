@@ -7,6 +7,7 @@ const notoSans = Noto_Sans({ subsets: ["latin", "cyrillic"], weight: ["400", "50
 export const metadata: Metadata = {
   title: "PeytOtoria",
   description: "Мессенджер нового поколения",
+  icons: { icon: "/favicon.jpg" },
 };
 
 export default function RootLayout({
