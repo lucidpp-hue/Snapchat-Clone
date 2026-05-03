@@ -37,7 +37,7 @@ export default function SignupCard() {
             if (error) {
                 setError(error.message);
             } else {
-                setSuccess("Check your email to confirm your account before logging in.");
+                setSuccess("Проверьте почту и подтвердите аккаунт перед входом.");
             }
         } finally {
             setLoading(false);
@@ -50,38 +50,38 @@ export default function SignupCard() {
                 <div className='space-y-2'>
                     <Input
                         type='text'
-                        placeholder='Full Name'
+                        placeholder='Полное имя'
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         required
-                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-yellow-400'
+                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-orange-400'
                     />
                     <Input
                         type='email'
-                        placeholder='Email'
+                        placeholder='Эл. почта'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-yellow-400'
+                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-orange-400'
                     />
                     <Input
                         type='password'
-                        placeholder='Password (min 6 characters)'
+                        placeholder='Пароль (мин. 6 символов)'
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                         minLength={6}
-                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-yellow-400'
+                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-orange-400'
                     />
                 </div>
                 <Button type='submit' className='w-full' disabled={loading}>
-                    {loading ? "Creating account..." : "Sign Up"}
+                    {loading ? "Создание аккаунта..." : "Зарегистрироваться"}
                 </Button>
             </form>
             <div className='mt-4 text-center text-[13px]'>
-                <span>Already have an account? </span>
+                <span>Уже есть аккаунт? </span>
                 <Link className='text-blue-500 hover:underline text-[13px] mr-1' href='/login'>
-                    Log in
+                    Войти
                 </Link>
                 {error ? <p className='text-sm text-red-500 mt-2'>{error}</p> : null}
                 {success ? <p className='text-sm text-green-500 mt-2'>{success}</p> : null}

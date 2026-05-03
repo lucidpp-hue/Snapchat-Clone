@@ -3,6 +3,9 @@ export type Profile = {
   full_name: string;
   email: string;
   avatar_url: string;
+  bio: string;
+  followers_count: number;
+  following_count: number;
   created_at: string;
   updated_at: string;
 };
@@ -20,7 +23,32 @@ export type Message = {
 };
 
 export type ChatEntry = {
-  _id: string; // the other user's id
+  _id: string;
   participants: Profile[];
   lastMessage: Message | null;
+};
+
+export type Post = {
+  id: string;
+  author_id: string;
+  content: string;
+  image_url: string;
+  views_count: number;
+  likes_count: number;
+  shares_count: number;
+  created_at: string;
+  updated_at: string;
+  author?: Profile;
+};
+
+export type Story = {
+  id: string;
+  author_id: string;
+  image_url: string;
+  caption: string;
+  views_count: number;
+  likes_count: number;
+  expires_at: string;
+  created_at: string;
+  author?: Profile;
 };

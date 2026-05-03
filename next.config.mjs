@@ -6,6 +6,11 @@ const nextConfig = {
                 protocol: "https",
                 hostname: "res.cloudinary.com",
             },
+            {
+                protocol: "https",
+                // Vercel Blob public store — matches *.public.blob.vercel-storage.com
+                hostname: "*.public.blob.vercel-storage.com",
+            },
         ],
     },
 };

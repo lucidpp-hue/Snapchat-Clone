@@ -25,7 +25,7 @@ const UserCard = ({ user, handleSelectUser, selectedUser }: UserCardProps) => {
     >
       <Avatar className="cursor-pointer hover:bg-sigBackgroundSecondaryHover">
         <AvatarImage src={user.avatar_url} />
-        <AvatarFallback className="bg-yellow-400 text-black text-xs font-bold">
+        <AvatarFallback className="bg-orange-500 text-black text-xs font-bold">
           {initials}
         </AvatarFallback>
       </Avatar>

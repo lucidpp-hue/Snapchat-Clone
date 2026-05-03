@@ -37,29 +37,29 @@ export default function LoginCard() {
                 <div className='space-y-2'>
                     <Input
                         type='email'
-                        placeholder='Email'
+                        placeholder='Эл. почта'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-yellow-400'
+                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-orange-400'
                     />
                     <Input
                         type='password'
-                        placeholder='Password'
+                        placeholder='Пароль'
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-yellow-400'
+                        className='bg-transparent border-gray-700 text-white placeholder-gray-400 focus:border-orange-400'
                     />
                 </div>
                 <Button type='submit' className='w-full' disabled={loading}>
-                    {loading ? "Logging in..." : "Log in"}
+                    {loading ? "Вход..." : "Войти"}
                 </Button>
             </form>
             <div className='mt-4 text-center text-[13px]'>
-                <span>New to SnapNext? </span>
+                <span>Нет аккаунта? </span>
                 <Link className='text-blue-500 hover:underline text-[13px] mr-1' href='/signup'>
-                    Sign Up
+                    Зарегистрироваться
                 </Link>
                 {error ? <p className='text-sm text-red-500 mt-2'>{error}</p> : null}
             </div>
