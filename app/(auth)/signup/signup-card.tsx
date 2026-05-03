@@ -78,9 +78,9 @@ export default function SignupCard() {
                     {loading ? "Создание аккаунта..." : "Зарегистрироваться"}
                 </Button>
             </form>
-            <div className='mt-4 text-center text-[13px]'>
+            <div className='mt-4 text-center text-[13px] text-gray-300'>
                 <span>Уже есть аккаунт? </span>
-                <Link className='text-blue-500 hover:underline text-[13px] mr-1' href='/login'>
+                <Link className='text-orange-400 hover:underline text-[13px] mr-1' href='/login'>
                     Войти
                 </Link>
                 {error ? <p className='text-sm text-red-500 mt-2'>{error}</p> : null}

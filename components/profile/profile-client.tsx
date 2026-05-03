@@ -2,9 +2,9 @@
 import Image from "next/image";
 import { useRef, useState, useTransition } from "react";
 import { Profile, Story } from "@/types/supabase";
-import { followAction, updateProfileAction, createStoryAction, likeStoryAction, incrementStoryViewAction } from "@/lib/action";
+import { followAction, updateProfileAction, createStoryAction } from "@/lib/action";
 import { Button } from "@/components/ui/button";
-import { Camera, Heart, Eye, Plus, X, MessageCircle, UserCheck, UserPlus } from "lucide-react";
+import { Camera, Plus, X, MessageCircle, UserCheck, UserPlus } from "lucide-react";
 import Link from "next/link";
 
 type Props = {
@@ -13,7 +13,6 @@ type Props = {
   initialFollowing: boolean;
   currentUserId: string;
   initialStories: Story[];
-  initialLikedStoryIds: string[];
 };
 
 function formatCount(n: number): string {
@@ -24,81 +23,21 @@ function formatCount(n: number): string {
 
 function StoryCard({
   story,
-  initialLiked,
   isOwner,
 }: {
   story: Story;
-  initialLiked: boolean;
   isOwner: boolean;
 }) {
-  const [liked, setLiked] = useState(initialLiked);
-  const [heartBurst, setHeartBurst] = useState(false);
-  const [views, setViews] = useState(story.views_count);
-  const [isPending, startTransition] = useTransition();
-  const viewedRef = useRef(false);
-
-  const handleView = () => {
-    if (viewedRef.current) return;
-    viewedRef.current = true;
-    incrementStoryViewAction(story.id);
-    setViews((v) => v + 1);
-  };
-
-  const handleLike = () => {
-    startTransition(async () => {
-      const nowLiked = await likeStoryAction(story.id);
-      setLiked(nowLiked);
-      if (nowLiked) {
-        setHeartBurst(true);
-        setTimeout(() => setHeartBurst(false), 600);
-      }
-    });
-  };
-
   return (
     <div
       className="relative rounded-2xl overflow-hidden bg-gray-900 cursor-pointer group"
       style={{ aspectRatio: "9/16" }}
-      onClick={handleView}
     >
       {story.image_url && (
         <Image src={story.image_url} alt="История" fill className="object-cover" />
       )}
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-
-      {/* Caption */}
-      {story.caption && (
-        <p className="absolute bottom-10 left-3 right-3 text-white text-xs font-medium leading-snug line-clamp-2">
-          {story.caption}
-        </p>
-      )}
-
-      {/* View count */}
-      <div className="absolute bottom-2 left-3 flex items-center gap-1 text-white/80 text-xs">
-        <Eye className="w-3 h-3" />
-        <span>{formatCount(views)}</span>
-      </div>
-
-      {/* Like button */}
-      {!isOwner && (
-        <button
-          onClick={(e) => { e.stopPropagation(); handleLike(); }}
-          disabled={isPending}
-          className="absolute bottom-2 right-3 flex items-center justify-center"
-        >
-          <span className="relative flex items-center justify-center w-7 h-7">
-            <Heart
-              className={`w-5 h-5 transition-all duration-150 ${
-                liked ? "text-red-500 fill-red-500" : "text-white/80 hover:text-red-400"
-              } ${heartBurst ? "scale-150" : "scale-100"}`}
-            />
-            {heartBurst && (
-              <span className="absolute inset-0 rounded-full bg-red-500/30 animate-heart-burst pointer-events-none" />
-            )}
-          </span>
-        </button>
-      )}
     </div>
   );
 }
@@ -109,7 +48,6 @@ export default function ProfileClient({
   initialFollowing,
   currentUserId,
   initialStories,
-  initialLikedStoryIds,
 }: Props) {
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url || "");
   const [following, setFollowing] = useState(initialFollowing);
@@ -169,11 +107,8 @@ export default function ProfileClient({
       await createStoryAction(json.url, storyCaption);
       const newStory: Story = {
         id: crypto.randomUUID(),
-        author_id: profile.id,
+        user_id: profile.id,
         image_url: json.url,
-        caption: storyCaption,
-        views_count: 0,
-        likes_count: 0,
         expires_at: new Date(Date.now() + 86400000).toISOString(),
         created_at: new Date().toISOString(),
       };
@@ -345,7 +280,6 @@ export default function ProfileClient({
                 <StoryCard
                   key={story.id}
                   story={story}
-                  initialLiked={initialLikedStoryIds.includes(story.id)}
                   isOwner={isOwner}
                 />
               ))}

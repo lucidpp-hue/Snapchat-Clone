@@ -12,13 +12,13 @@ export type Profile = {
 
 export type Message = {
   id: string;
+  conversation_id: string;
   sender_id: string;
-  receiver_id: string;
   content: string;
-  message_type: "text" | "image";
+  image_url?: string | null;
+  is_read: boolean;
   opened: boolean;
   created_at: string;
-  updated_at: string;
   sender?: Profile;
 };
 
@@ -28,27 +28,16 @@ export type ChatEntry = {
   lastMessage: Message | null;
 };
 
-export type Post = {
-  id: string;
-  author_id: string;
-  content: string;
-  image_url: string;
-  views_count: number;
-  likes_count: number;
-  shares_count: number;
-  created_at: string;
-  updated_at: string;
-  author?: Profile;
-};
-
 export type Story = {
   id: string;
-  author_id: string;
+  user_id: string;
   image_url: string;
-  caption: string;
-  views_count: number;
-  likes_count: number;
   expires_at: string;
   created_at: string;
+  // UI-only fields (not in DB but used in components)
+  author_id?: string;
+  caption?: string;
+  views_count?: number;
+  likes_count?: number;
   author?: Profile;
 };

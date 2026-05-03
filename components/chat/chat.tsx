@@ -13,7 +13,7 @@ type ChatProps = {
 const Chat = ({ chat }: ChatProps) => {
   const userToChat = chat.participants[0];
   const lastMessage = chat.lastMessage;
-  const lastMessageType = lastMessage?.message_type;
+  const lastMessageType = lastMessage?.image_url ? "image" : "text";
   const formattedDate = lastMessage
     ? formatDate(new Date(lastMessage.created_at))
     : formatDate(new Date());

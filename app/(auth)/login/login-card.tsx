@@ -56,9 +56,9 @@ export default function LoginCard() {
                     {loading ? "Вход..." : "Войти"}
                 </Button>
             </form>
-            <div className='mt-4 text-center text-[13px]'>
+            <div className='mt-4 text-center text-[13px] text-gray-300'>
                 <span>Нет аккаунта? </span>
-                <Link className='text-blue-500 hover:underline text-[13px] mr-1' href='/signup'>
+                <Link className='text-orange-400 hover:underline text-[13px] mr-1' href='/signup'>
                     Зарегистрироваться
                 </Link>
                 {error ? <p className='text-sm text-red-500 mt-2'>{error}</p> : null}

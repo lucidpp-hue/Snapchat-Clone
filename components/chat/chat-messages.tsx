@@ -22,7 +22,7 @@ const ChatMessages = ({ messages, authUserId }: ChatMessagesProps) => {
       {messages.map((message, idx) => {
         const amISender = message.sender_id === authUserId;
         const senderName = (message.sender?.full_name || message.sender?.email || "").toUpperCase();
-        const isMessageImage = message.message_type === "image";
+        const isMessageImage = !!message.image_url;
         const isPrevFromSameSender =
           idx > 0 && messages[idx - 1].sender_id === message.sender_id;
 
@@ -46,13 +46,13 @@ const ChatMessages = ({ messages, authUserId }: ChatMessagesProps) => {
                 {isMessageImage ? (
                   <div className="relative">
                     <Image
-                      src={message.content}
+                      src={message.image_url!}
                       width={200}
                       height={200}
                       className="h-auto w-auto object-cover cursor-pointer"
                       alt="Image"
                       onLoad={() => lastMsgRef.current?.scrollIntoView({ behavior: "smooth" })}
-                      onClick={() => setIsPreviewingImage({ open: true, imgURL: message.content })}
+                      onClick={() => setIsPreviewingImage({ open: true, imgURL: message.image_url! })}
                     />
                   </div>
                 ) : (
